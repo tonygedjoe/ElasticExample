@@ -23,7 +23,7 @@ public class NetflowTest {
     public void NetflowUploadTest() {
         try (final RestHighLevelClient client = new RestHighLevelClient(
                 RestClient.builder(
-                        new HttpHost("localhost", 9200, "http")
+                        new HttpHost("10.210.9.123", 9200, "http")
                 )
         )) {
             NetworkCollector collector = new NetworkCollector();

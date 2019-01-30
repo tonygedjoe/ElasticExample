@@ -21,19 +21,19 @@ public class GetApiTest {
     public void getApiSyncTest() {
         try (final RestHighLevelClient client = new RestHighLevelClient(
                 RestClient.builder(
-                        new HttpHost("localhost", 9200, "http")
+                        new HttpHost("10.210.9.123", 9200, "http")
                 )
         )) {
             final GetRequest request = new GetRequest()
-                    .index("testindex")
-                    .type("logs")
-                    .id("id");
+                    .index("elastiflow-3.3.0-2019.01.28")
+                    .type("doc")
+                    .id("u_JceGgB1R_xAGjqOuuL");
 
             final GetResponse response = client.get(request);
 
-            assertThat(response.getIndex(), is("testindex"));
-            assertThat(response.getType(), is("logs"));
-            assertThat(response.getId(), is("id"));
+            assertThat(response.getIndex(), is("elastiflow-3.3.0-2019.01.28"));
+            assertThat(response.getType(), is("doc"));
+            assertThat(response.getId(), is("u_JceGgB1R_xAGjqOuuL"));
 
             if (response.isExists()) {
                 assertThat(response.getSourceAsString(), is(containsString("\"key\": \"value\"")));

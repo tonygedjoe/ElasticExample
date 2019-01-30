@@ -4,9 +4,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -16,27 +16,29 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.QueryBuilders.*;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tg.elastic.entity.FlowDocument;
-import com.tg.elastic.entity.NetworkFlow;
+import com.tg.elastic.entity.NetflowItem;
 
 
-public class FindForSourceIPTest {
+public class LiveSearchApiTest {
 
 	 @Test
 	    public void searchNetflowApiSyncTest() throws IOException {
+		 
+		 	
 	        try (final RestHighLevelClient client = new RestHighLevelClient(
 	        		RestClient.builder(
 	                        new HttpHost("10.210.9.123", 9200, "http")
 	                )
 	        )) {
 	        	
-	        	QueryBuilder qb2 = QueryBuilders.matchQuery("flowList.sourceIPAddr", "10.1.1.1");
+	        	QueryBuilder qb2 = QueryBuilders.matchAllQuery();
 	        	QueryBuilder qb1 = QueryBuilders.boolQuery()
 	        			.queryName("test query 1")
 	        			.must(qb2);
@@ -46,43 +48,30 @@ public class FindForSourceIPTest {
 	            		.query(qb1)
 	                    .from(0)
 	                    .size(5)
+	                    //.fetchSource(includes, excludes)
 	                    .timeout(TimeValue.timeValueMinutes(2));
 
 	            final SearchRequest request = new SearchRequest()
-	            		.indices("testflow")
-	                    .source(builder);
+	            		.indices("elastiflow-3.3.0-2019.01.23")
+	            		.source(builder);
 
 	            final SearchResponse response = client.search(request, RequestOptions.DEFAULT);
 	            
+	           
 	            
+	            SearchHit[] searchHits = response.getHits().getHits();
 	            
-	            SearchHits searchHits = response.getHits();
+	            assertThat(searchHits.length, is(5));
 	            
-	            Map<String, Integer> sourceMap = new HashMap<>();
-	            
-	            for ( SearchHit hit : searchHits.getHits()) {
-
+	            for ( SearchHit hit : response.getHits()) {
+	            	
 	            	String jsonStr = hit.getSourceAsString();
 	            	
 	            	ObjectMapper mapper = new ObjectMapper();
-	            	FlowDocument flowDocument = mapper.readValue(jsonStr, FlowDocument.class);
-	            	
-	            	for ( NetworkFlow flow : flowDocument.getFlowList()) {
-	            		Integer count = 1;
-	            		if ( sourceMap.containsKey(flow.getDestIPAddr())) {
-	            			count = sourceMap.get(flow.getDestIPAddr());
-	            			count++;
-	            		}
-	            		sourceMap.put(flow.getDestIPAddr(), count);
-	            	}	         	
+	            	NetflowItem item = mapper.readValue(jsonStr, NetflowItem.class);
+	            		           
+	            	System.out.println("Map item: ");
 	            }
-	            
-	            System.out.println("10.1.1.1 talks to:");
-	            
-	            sourceMap.entrySet().stream()
-	            	.forEach(s -> {
-	            		System.out.println(s.getKey());	
-	            	});
 	            
 	            return;
 	        }

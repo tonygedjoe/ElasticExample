@@ -4,9 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.data.elasticsearch.annotations.Document;
 
-@Document(indexName = "netflow")
 public class FlowDocument  implements Serializable {
 
 	/**
