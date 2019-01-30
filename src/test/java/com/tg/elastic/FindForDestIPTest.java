@@ -36,16 +36,20 @@ public class FindForDestIPTest {
 	                )
 	        )) {
 	        	
+	        	QueryBuilder qb3 = QueryBuilders.existsQuery("flowList.destIPAddr");
 	        	QueryBuilder qb2 = QueryBuilders.matchQuery("flowList.destIPAddr", "10.1.1.1");
 	        	QueryBuilder qb1 = QueryBuilders.boolQuery()
 	        			.queryName("test query 2")
-	        			.must(qb2);
+	        			.must(qb2)
+	        			.must(qb3)
+	        			;
 	        	
 	        	
 	        	final SearchSourceBuilder builder = new SearchSourceBuilder()
 	            		.query(qb1)
-	                    .from(0)
+	            		.from(0)
 	                    .size(100)
+	                    .fetchSource(new String[] {"flowList.destIPAddr", "flowList.sourceIPAddr"}, new String[] {})
 	                    .timeout(TimeValue.timeValueMinutes(2));
 
 	            final SearchRequest request = new SearchRequest()

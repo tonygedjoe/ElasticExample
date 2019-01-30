@@ -32,7 +32,7 @@ public class FindForSourceIPTest {
 	    public void searchNetflowApiSyncTest() throws IOException {
 	        try (final RestHighLevelClient client = new RestHighLevelClient(
 	        		RestClient.builder(
-	                        new HttpHost("10.210.9.123", 9200, "http")
+	                        new HttpHost("localhost", 9200, "http")
 	                )
 	        )) {
 	        	
